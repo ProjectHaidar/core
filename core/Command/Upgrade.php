@@ -73,7 +73,13 @@ class Upgrade extends Command {
 				null,
 				InputOption::VALUE_NONE,
 				'Skip disabling of third party apps.'
-			);
+			)
+			->addOption(
+				'--major',
+				null,
+				InputOption::VALUE_NONE,
+				'Automatically update apps to new major versions during minor updates of ownCloud Server'
+				);
 	}
 
 	/**

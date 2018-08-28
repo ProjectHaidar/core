@@ -93,6 +93,20 @@ class Apps implements IRepairStep {
 	}
 
 	/**
+	 * Is it a major core update
+	 * @return bool
+	 */
+	private function isMajorCoreUpdate() {
+		// TODO: override from CLI argument as it should have a precedence on the logic below
+		$installedVersion = $this->config->getSystemValue('version', '0.0.0');
+		$installedVersionArray = \explode('.', $installedVersion);
+		$installedVersionMajor = $installedVersionArray[0];
+		$currentVersionArray = Util::getVersion();
+		$currentVersionMajor = $currentVersionArray[0];
+		return $installedVersionMajor > $currentVersionMajor;
+	}
+
+	/**
 	 * If we are updating from <= 10.0.0 we need to enable the marketplace before running the update
 	 * @return bool
 	 */
@@ -219,7 +233,10 @@ class Apps implements IRepairStep {
 			try {
 				$this->eventDispatcher->dispatch(
 					\sprintf('%s::%s', IRepairStep::class, $event),
-					new GenericEvent($app)
+					new GenericEvent(
+						$app,
+						['isMajorUpdate' => $this->isMajorCoreUpdate()]
+					)
 				);
 			} catch (AppAlreadyInstalledException $e) {
 				$output->info($e->getMessage());
