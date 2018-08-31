@@ -207,30 +207,32 @@
 
 			// save it
 			// ***
-			this.model.save(attributes, {
-				// explicit attributes for patch-like PUT to avoid
-				// passing all attributes
-				attrs: attributes,
-				success: function() {
-					if (self.mailView) {
-						// also send out email first
-						// do not resolve on errors
-						self.mailView.sendEmails().then(done);
-					} else {
-						done();
+			if (validates) {
+				this.model.save(attributes, {
+					// explicit attributes for patch-like PUT to avoid
+					// passing all attributes
+					attrs: attributes,
+					success: function() {
+						if (self.mailView) {
+							// also send out email first
+							// do not resolve on errors
+							self.mailView.sendEmails().then(done);
+						} else {
+							done();
+						}
+						self.model.unset("resetPassword");
+					},
+					error: function (model, xhr) {
+						var msg = xhr.responseJSON.ocs.meta.message;
+						// destroy old tooltips
+						$loading.addClass('hidden');
+						$formElements.removeAttr('disabled');
+						$select2Elements.removeClass('hidden');
+						$errorMessageGlobal.removeClass('hidden').text(msg);
+						deferred.reject(self.model);
 					}
-					self.model.unset("resetPassword");
-				},
-				error: function (model, xhr) {
-					var msg = xhr.responseJSON.ocs.meta.message;
-					// destroy old tooltips
-					$loading.addClass('hidden');
-					$formElements.removeAttr('disabled');
-					$select2Elements.removeClass('hidden');
-					$errorMessageGlobal.removeClass('hidden').text(msg);
-					deferred.reject(self.model);
-				}
-			});
+				});
+			}
 
 			return deferred.promise();
 		},
