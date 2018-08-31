@@ -73,6 +73,9 @@
 		/** @type {OC.Share.ShareItemModel} **/
 		itemModel: undefined,
 
+		/** @type {string} **/
+		modelBackup: '',
+
 		/** @type {Function} **/
 		_template: undefined,
 
@@ -88,6 +91,8 @@
 				model: this.model,
 				itemModel: this.itemModel
 			});
+
+			this._writeModelBackup();
 
 			OC.Plugins.attach('OCA.Share.ShareDialogLinkShareView', this);
 		},
@@ -115,6 +120,14 @@
 			} else {
 				return false;
 			}
+		},
+
+		_writeModelBackup: function () {
+			this.modelBackup = JSON.stringify(this.model);
+		},
+
+		_recoverFromModelBackup: function() {
+			this.model.set(JSON.parse(this.modelBackup));
 		},
 
 		_save: function () {
@@ -308,12 +321,14 @@
 			var self = this;
 			this._save().then(function() {
 				self.$dialog.ocdialog('close');
+				self._writeModelBackup();
 			});
 		},
 
 		_onClickCancel: function() {
 			this.$dialog.ocdialog('close');
 			this.model.unset("resetPassword");
+			this._recoverFromModelBackup();
 		},
 		/**
 		 * @returns {Function} from Handlebars
