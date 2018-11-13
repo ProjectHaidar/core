@@ -184,6 +184,22 @@ Feature: Federation Sharing - sharing with users on other cloud storages
     Then the file "lorem (2).txt" should not be listed on the webUI
     And the file "lorem (2).txt" should not be listed in the files page on the webUI
 
+  Scenario: test sharing folder to a remote server and resharing it back to to the local
+    Given using server "LOCAL"
+    And these users have been created:
+      | username |
+      | kamikaze |
+    When the user shares the folder "simple-folder" with the remote user "user1@%remote_server_without_scheme%" using the webUI
+    And using server "REMOTE"
+    And user "user1" re-logs in to "%remote_server%" using the webUI
+    And the user accepts the offered remote shares using the webUI
+    And user "user1" from server "REMOTE" has shared "/simple-folder (2)" with user "kamikaze" from server "LOCAL"
+    And using server "LOCAL"
+    And user "kamikaze" re-logs in to "%local_server%" using the webUI
+    And the user accepts the offered remote shares using the webUI
+    Then as "kamikaze" the folder "/simple-folder (2)" should exist
+    And as "kamikaze" the file "/simple-folder (2)/lorem.txt" should exist
+
   @skip @issue-32732
   Scenario: test sharing long file names with federation share
     When user "user1" moves file "/lorem.txt" to "/averylongfilenamefortestingthatfileswithlongfilenamescannotbeshared.txt" using the WebDAV API
