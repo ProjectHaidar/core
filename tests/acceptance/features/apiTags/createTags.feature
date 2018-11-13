@@ -30,6 +30,11 @@ Feature: Creation of tags
     Then the HTTP status code should be "400"
     And tag "JustARegularTagName" should not exist for the administrator
 
+  Scenario: Creating a static tag as regular user should fail
+    When the user creates a "static" tag with name "StaticTagName" using the WebDAV API
+    Then the HTTP status code should be "400"
+    And tag "StaticTagName" should not exist for the administrator
+
   Scenario: Creating a not user-visible tag as regular user should fail
     When the user creates a "not user-visible" tag with name "JustARegularTagName" using the WebDAV API
     Then the HTTP status code should be "400"
@@ -52,6 +57,12 @@ Feature: Creation of tags
     Then the HTTP status code should be "201"
     And the following tags should exist for the administrator
       | JustARegularTagName | not user-visible |
+
+  Scenario: Creating a static tag as administrator should work
+    When the administrator creates a "static" tag with name "StaticTagName" using the WebDAV API
+    Then the HTTP status code should be "201"
+    And the following tags should exist for the administrator
+      | StaticTagName | static |
 
   @smokeTest
   Scenario: Creating a not user-assignable tag with groups as admin should work
