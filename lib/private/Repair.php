@@ -29,6 +29,7 @@
 
 namespace OC;
 
+use OC\Helper\EnvironmentHelper;
 use OC\Repair\Apps;
 use OC\Repair\CleanTags;
 use OC\Repair\Collation;
@@ -195,7 +196,13 @@ class Repair implements IOutput {
 			new SqliteAutoincrement($connection),
 			new RepairOrphanedSubshare($connection),
 			new SearchLuceneTables(),
-			new Apps(\OC::$server->getAppManager(), \OC::$server->getEventDispatcher(), \OC::$server->getConfig(), new \OC_Defaults()),
+			new Apps(
+				\OC::$server->getAppManager(),
+				\OC::$server->getEventDispatcher(),
+				\OC::$server->getConfig(),
+				new \OC_Defaults(),
+				new EnvironmentHelper()
+			),
 		];
 
 		//There is no need to delete all previews on every single update

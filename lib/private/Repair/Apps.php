@@ -24,6 +24,7 @@ namespace OC\Repair;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Type;
 use OC\App\Platform;
+use OC\Helper\EnvironmentHelper;
 use OC\RepairException;
 use OC_App;
 use OCP\App\AppAlreadyInstalledException;
@@ -35,7 +36,8 @@ use OCP\App\IAppManager;
 use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
 use OCP\Util;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use OCP\IConfig;
 
@@ -47,7 +49,7 @@ class Apps implements IRepairStep {
 	/** @var  IAppManager */
 	private $appManager;
 
-	/** @var  EventDispatcher */
+	/** @var  EventDispatcherInterface */
 	private $eventDispatcher;
 
 	/** @var IConfig */
@@ -56,19 +58,23 @@ class Apps implements IRepairStep {
 	/** @var \OC_Defaults */
 	private $defaults;
 
+	/** @var EnvironmentHelper */
+	private $environmentHelper;
+
 	/**
 	 * Apps constructor.
 	 *
 	 * @param IAppManager $appManager
-	 * @param EventDispatcher $eventDispatcher
+	 * @param EventDispatcherInterface $eventDispatcher
 	 * @param IConfig $config
 	 * @param \OC_Defaults $defaults
 	 */
-	public function __construct(IAppManager $appManager, EventDispatcher $eventDispatcher, IConfig $config, \OC_Defaults $defaults) {
+	public function __construct(IAppManager $appManager, EventDispatcherInterface $eventDispatcher, IConfig $config, \OC_Defaults $defaults, EnvironmentHelper $environmentHelper) {
 		$this->appManager = $appManager;
 		$this->eventDispatcher = $eventDispatcher;
 		$this->config = $config;
 		$this->defaults = $defaults;
+		$this->environmentHelper = $environmentHelper;
 	}
 
 	/**
@@ -97,13 +103,23 @@ class Apps implements IRepairStep {
 	 * @return bool
 	 */
 	private function isMajorCoreUpdate() {
-		// TODO: override from CLI argument as it should have a precedence on the logic below
 		$installedVersion = $this->config->getSystemValue('version', '0.0.0');
 		$installedVersionArray = \explode('.', $installedVersion);
 		$installedVersionMajor = $installedVersionArray[0];
 		$currentVersionArray = Util::getVersion();
 		$currentVersionMajor = $currentVersionArray[0];
-		return $installedVersionMajor > $currentVersionMajor;
+		$majorUpgrade = $installedVersionMajor > $currentVersionMajor;
+
+		// If we running as a CLI command we need to check for --major as well
+		if ($majorUpgrade === false && $this->environmentHelper->isCli()) {
+			$input = new ArgvInput();
+			$hasMajorOption = (bool) $input->getOption('major');
+			if ($hasMajorOption === true) {
+				$majorUpgrade = true;
+			}
+		}
+
+		return $majorUpgrade;
 	}
 
 	/**

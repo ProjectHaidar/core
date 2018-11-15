@@ -26,6 +26,15 @@ namespace OC\Helper;
  */
 class EnvironmentHelper {
 	/**
+	 * Check if ownCloud runs in cli mode
+	 *
+	 * @return bool
+	 */
+	public function isCli() {
+		return \OC::$CLI;
+	}
+
+	/**
 	 * Get the ownCloud root path for http requests (e.g. owncloud/)
 	 *
 	 * @return string

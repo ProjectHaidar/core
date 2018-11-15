@@ -19,10 +19,11 @@
  *
  */
 namespace Test\Repair;
+use OC\Helper\EnvironmentHelper;
 use OC\Repair\Apps;
 use OCP\App\IAppManager;
 use OCP\IConfig;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Test\TestCase;
 
 /**
@@ -36,21 +37,29 @@ class AppsTest extends TestCase {
 	protected $repair;
 	/** @var IAppManager | \PHPUnit_Framework_MockObject_MockObject */
 	protected $appManager;
-	/** @var  EventDispatcher | \PHPUnit_Framework_MockObject_MockObject */
+	/** @var  EventDispatcherInterface | \PHPUnit_Framework_MockObject_MockObject */
 	protected $eventDispatcher;
 	/** @var  IConfig | \PHPUnit_Framework_MockObject_MockObject*/
 	protected $config;
 	/** @var \OC_Defaults | \PHPUnit_Framework_MockObject_MockObject */
 	private $defaults;
+	/** @var EnvironmentHelper | \PHPUnit_Framework_MockObject_MockObject */
+	private $environmentHelper;
 
 	protected function setUp() {
 		parent::setUp();
-
 		$this->appManager = $this->createMock(IAppManager::class);
 		$this->defaults = $this->createMock(\OC_Defaults::class);
-		$this->eventDispatcher = $this->createMock(EventDispatcher::class);
+		$this->eventDispatcher = $this->createMock(EventDispatcherInterface::class);
 		$this->config = $this->createMock(IConfig::class);
-		$this->repair = new Apps($this->appManager, $this->eventDispatcher, $this->config, $this->defaults);
+		$this->environmentHelper = $this->createMock(EnvironmentHelper::class);
+		$this->repair = new Apps(
+			$this->appManager,
+			$this->eventDispatcher,
+			$this->config,
+			$this->defaults,
+			$this->environmentHelper
+		);
 	}
 
 	public function testMarketEnableVersionCompare10() {
