@@ -102,12 +102,15 @@ class Upgrade extends Command {
 				$output->setFormatter($timestampFormatter);
 			}
 
-			$self = $this;
 			$updater = new Updater(
 					$this->config,
 					\OC::$server->getIntegrityCodeChecker(),
 					$this->logger
 			);
+
+			if ($input->getOption('major')) {
+				$updater->setForceMajorUpgrade(true);
+			}
 
 			$dispatcher = \OC::$server->getEventDispatcher();
 			$progress = new ProgressBar($output);

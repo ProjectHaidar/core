@@ -67,7 +67,9 @@ class EnvironmentHelper {
 
 	/**
 	 * Get the environment variable
-	 * @param $envVar
+	 *
+	 * @param string $envVar
+	 *
 	 * @return array|false|string
 	 */
 	public function getEnvVar($envVar) {

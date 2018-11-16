@@ -33,13 +33,13 @@ use OCP\App\AppNotFoundException;
 use OCP\App\AppNotInstalledException;
 use OCP\App\AppUpdateNotFoundException;
 use OCP\App\IAppManager;
+use OCP\IConfig;
 use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
 use OCP\Util;
-use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\GenericEvent;
-use OCP\IConfig;
+
 
 class Apps implements IRepairStep {
 	const KEY_COMPATIBLE = 'compatible';
@@ -61,6 +61,9 @@ class Apps implements IRepairStep {
 	/** @var EnvironmentHelper */
 	private $environmentHelper;
 
+	/** @var bool */
+	private $forceMajorUpgrade;
+
 	/**
 	 * Apps constructor.
 	 *
@@ -69,12 +72,13 @@ class Apps implements IRepairStep {
 	 * @param IConfig $config
 	 * @param \OC_Defaults $defaults
 	 */
-	public function __construct(IAppManager $appManager, EventDispatcherInterface $eventDispatcher, IConfig $config, \OC_Defaults $defaults, EnvironmentHelper $environmentHelper) {
+	public function __construct(IAppManager $appManager, EventDispatcherInterface $eventDispatcher, IConfig $config, \OC_Defaults $defaults, EnvironmentHelper $environmentHelper, $forceMajorUpgrade = false) {
 		$this->appManager = $appManager;
 		$this->eventDispatcher = $eventDispatcher;
 		$this->config = $config;
 		$this->defaults = $defaults;
 		$this->environmentHelper = $environmentHelper;
+		$this->forceMajorUpgrade = $forceMajorUpgrade;
 	}
 
 	/**
@@ -100,24 +104,20 @@ class Apps implements IRepairStep {
 
 	/**
 	 * Is it a major core update
+	 *
 	 * @return bool
 	 */
 	private function isMajorCoreUpdate() {
+		if ($this->forceMajorUpgrade === true) {
+			return true;
+		}
+
 		$installedVersion = $this->config->getSystemValue('version', '0.0.0');
 		$installedVersionArray = \explode('.', $installedVersion);
 		$installedVersionMajor = $installedVersionArray[0];
 		$currentVersionArray = Util::getVersion();
 		$currentVersionMajor = $currentVersionArray[0];
 		$majorUpgrade = $installedVersionMajor > $currentVersionMajor;
-
-		// If we running as a CLI command we need to check for --major as well
-		if ($majorUpgrade === false && $this->environmentHelper->isCli()) {
-			$input = new ArgvInput();
-			$hasMajorOption = (bool) $input->getOption('major');
-			if ($hasMajorOption === true) {
-				$majorUpgrade = true;
-			}
-		}
 
 		return $majorUpgrade;
 	}

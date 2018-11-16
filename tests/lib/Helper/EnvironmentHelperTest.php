@@ -22,6 +22,7 @@
 namespace Test\Helper;
 
 use OC\Helper\EnvironmentHelper;
+use Symfony\Component\Console\Input\InputOption;
 use Test\TestCase;
 
 class EnvironmentHelperTest extends TestCase {
