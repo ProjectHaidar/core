@@ -23,6 +23,7 @@ require_once 'bootstrap.php';
 
 use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\TableNode;
+use Behat\Mink\Session;
 use Behat\MinkExtension\Context\RawMinkContext;
 use Page\NotificationsEnabledOwncloudPage;
 use Page\Notification;
@@ -60,7 +61,7 @@ class WebUINotificationsContext extends RawMinkContext implements Context {
 	public function assertNotificationsOnWebUI(
 		$number, TableNode $expectedNotifications
 	) {
-		$notificationsDialog = $this->openNotificationsDialog();
+		$notificationsDialog = $this->openNotificationsDialog($this->getSession());
 		$notifications = $notificationsDialog->getAllNotifications();
 		PHPUnit_Framework_Assert::assertEquals(
 			$number,
@@ -106,7 +107,7 @@ class WebUINotificationsContext extends RawMinkContext implements Context {
 	 * @return void
 	 */
 	public function userFollowsLink($firstOrLast) {
-		$notificationsDialog = $this->openNotificationsDialog();
+		$notificationsDialog = $this->openNotificationsDialog($this->getSession());
 		$notifications = $notificationsDialog->getAllNotificationObjects();
 		if ($firstOrLast === 'first') {
 			/**
@@ -134,7 +135,7 @@ class WebUINotificationsContext extends RawMinkContext implements Context {
 	 * @return void
 	 */
 	public function userReactsToAllNotificationsOnTheWebUI($reaction) {
-		$notificationsDialog = $this->openNotificationsDialog();
+		$notificationsDialog = $this->openNotificationsDialog($this->getSession());
 		$notifications = $notificationsDialog->getAllNotificationObjects();
 		while (\count($notifications) > 0) {
 			$notifications[0]->react($reaction, $this->getSession());
@@ -165,11 +166,13 @@ class WebUINotificationsContext extends RawMinkContext implements Context {
 
 	/**
 	 *
+	 * @param Session $sesion
+	 *
 	 * @return \Page\NotificationsAppDialog
 	 */
-	protected function openNotificationsDialog() {
+	protected function openNotificationsDialog(Session $session) {
 		$this->getSession()->reload();
 		$this->owncloudPage->waitForNotifications();
-		return $this->owncloudPage->openNotifications();
+		return $this->owncloudPage->openNotifications($session);
 	}
 }

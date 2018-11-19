@@ -195,6 +195,13 @@ abstract class FilesPageBasic extends OwncloudPage {
 	}
 
 	/**
+	 * @return string
+	 */
+	public function getFileActionMenuXpath() {
+		return $this->fileActionMenuXpath;
+	}
+
+	/**
 	 * @return int the number of files and folders listed on the page
 	 */
 	public function getSizeOfFileFolderList() {
@@ -447,11 +454,12 @@ abstract class FilesPageBasic extends OwncloudPage {
 	 *
 	 * @return FileActionsMenu
 	 */
-	public function openFileActionsMenuByNo($number) {
+	public function openFileActionsMenuByNo($number, Session $session) {
 		$this->clickFileActionsMenuBtnByNo($number);
-		$actionMenuElement = $this->findFileActionMenuElement();
 		$actionMenu = $this->getPage('FilesPageElement\\FileActionsMenu');
-		$actionMenu->setElement($actionMenuElement);
+		$actionMenu->waitTillPageIsLoaded(
+			$session, STANDARD_UI_WAIT_TIMEOUT_MILLISEC, $this->getFileActionMenuXpath()
+		);
 		return $actionMenu;
 	}
 
