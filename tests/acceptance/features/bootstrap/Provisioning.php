@@ -245,29 +245,72 @@ trait Provisioning {
 	}
 
 	/**
-	 * @Given /^these users have been created\s?(but not initialized|):$/
+	 * @Given /^user "([^"]*)" has been created with default attributes$/
+	 *
+	 * @param string $user
+	 *
+	 * @return void
+	 * @throws \Exception
+	 */
+	public function userHasBeenCreatedWithDefaultAttributes($user) {
+		$username = $this->getActualUsername($user);
+
+		$email = $this->getEmailAddressForUser($user);
+		$displayName = $this->getDisplayNameForUser($user);
+
+		if ($email === null && $displayName === null) {
+			// set email as that of `regularuser` as default
+			$email = $this->getEmailAddressForUser('regularuser');
+			$displayName = $this->getDisplayNameForUser('regularuser');
+		}
+
+		$this->createUser(
+			$username,
+			// Let createUser() select the password
+			null,
+			$displayName,
+			$email,
+			true
+		);
+
+		if (\getenv("TEST_EXTERNAL_USER_BACKENDS") !== "true") {
+			$this->userShouldExist($user);
+		}
+	}
+
+	/**
+	 * @Given /^these users have been created\s?(but not initialized|)\s?(with default attributes|):$/
 	 * expects a table of users with the heading
 	 * "|username|password|displayname|email|"
 	 * password, displayname & email are optional
 	 *
 	 * @param string $doNotInitialize just create the user, do not trigger creating skeleton files etc
+	 * @param string $setDefaultAttributes
 	 * @param TableNode $table
 	 *
 	 * @return void
 	 * @throws \Exception
 	 */
-	public function theseUsersHaveBeenCreated($doNotInitialize, TableNode $table) {
+	public function theseUsersHaveBeenCreatedWithDefaultAttributes($doNotInitialize, $setDefaultAttributes, TableNode $table) {
 		foreach ($table as $row) {
 			if (isset($row['displayname'])) {
 				$displayName = $row['displayname'];
 			} else {
 				$displayName = null;
+
+				if (isset($setDefaultAttributes)) {
+					$displayName = 'Regular User';
+				}
 			}
 
 			if (isset($row['email'])) {
 				$email = $row['email'];
 			} else {
 				$email = null;
+
+				if (isset($setDefaultAttributes)) {
+					$email = $row ['username'] . '@owncloud.org';
+				}
 			}
 
 			if (isset($row['password'])) {

@@ -5,7 +5,7 @@ Feature: disable user
   So that I can remove access to files and resources for a user, without actually deleting the files and resources
 
   Scenario: admin disables an user
-    Given user "user1" has been created
+    Given user "user1" has been created with default attributes
     When the administrator disables user "user1" using the occ command
     Then the command should have been successful
     And the command output should contain the text 'The specified user is disabled'

@@ -5,7 +5,7 @@ Feature: enable user
   So that I can give a user access to their files and resources again if they are now authorized for that
 
   Scenario: admin enables an user
-    Given user "user1" has been created
+    Given user "user1" has been created with default attributes
     And user "user1" has been disabled
     When administrator enables user "user1" using the occ command
     Then the command should have been successful

@@ -30,8 +30,8 @@ Feature: get group
 
   @smokeTest
   Scenario: subadmin gets users in a group they are responsible for
-    Given user "user1" has been created
-    And user "user2" has been created
+    Given user "user1" has been created with default attributes
+    And user "user2" has been created with default attributes
     And user "subadmin" has been created
     And group "new-group" has been created
     And user "subadmin" has been made a subadmin of group "new-group"

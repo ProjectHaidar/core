@@ -9,7 +9,7 @@ Feature: enable user
 
   @smokeTest
   Scenario: admin enables an user
-    Given user "user1" has been created
+    Given user "user1" has been created with default attributes
     And user "user1" has been disabled
     When the administrator sends HTTP method "PUT" to OCS API endpoint "/cloud/users/user1/enable"
     Then the OCS status code should be "100"
@@ -45,8 +45,8 @@ Feature: enable user
     Then user "another-admin" should be disabled
 
   Scenario: normal user tries to enable other user
-    Given user "user1" has been created
-    And user "user2" has been created
+    Given user "user1" has been created with default attributes
+    And user "user2" has been created with default attributes
     And user "user2" has been disabled
     When user "user1" sends HTTP method "PUT" to OCS API endpoint "/cloud/users/user2/enable"
     Then the OCS status code should be "997"
@@ -65,6 +65,6 @@ Feature: enable user
     And user "subadmin" should be disabled
 
   Scenario: Making a web request with an enabled user
-    Given user "user0" has been created
+    Given user "user0" has been created with default attributes
     When user "user0" sends HTTP method "GET" to URL "/index.php/apps/files"
     Then the HTTP status code should be "200"
